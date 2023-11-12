@@ -20,6 +20,7 @@ voivodeships = [
 ]
 
 def main():
+    
     for i in voivodeships:
         otodom_engine.initiate_voivodeship_scrapage(i)
 
