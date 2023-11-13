@@ -1,6 +1,7 @@
 from engines import otodom_engine
 
 voivodeships = [
+    "pomorskie",
     "dolnoslaskie",
     "kujawsko--pomorskie",
     "lubelskie",
@@ -11,7 +12,6 @@ voivodeships = [
     "opolskie",
     "podkarpackie",
     "podlaskie",
-    "pomorskie",
     "slaskie",
     "swietokrzyskie",
     "warminsko--mazurskie",
@@ -20,7 +20,7 @@ voivodeships = [
 ]
 
 def main():
-    
+
     for i in voivodeships:
         otodom_engine.initiate_voivodeship_scrapage(i)
 
