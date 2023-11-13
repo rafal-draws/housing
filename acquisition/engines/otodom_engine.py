@@ -1,7 +1,3 @@
-import configparser
-
-import concurrent.futures
-
 import re
 
 from bs4 import BeautifulSoup
@@ -17,36 +13,35 @@ def initiate_voivodeship_scrapage(voivodeship:str):
     options = webdriver.FirefoxOptions()
     options.add_argument("--headless")
     driver = webdriver.Firefox(options=options)
-
+    voivodeship_articles = []
 
     iteration = 1
     url = f"https://www.otodom.pl/pl/wyniki/sprzedaz/mieszkanie/{voivodeship}?viewType=listing&limit=72&page={iteration}"
-
     limit = int(get_limit(driver, url))
-    print(limit)
+
 
     while iteration < limit:
         go_to_next_page(driver, iteration, voivodeship)
-        get_articles(driver)
+        current_page_articles = get_articles_list_from_page(driver, voivodeship)
+        for article in current_page_articles:
+            voivodeship_articles.append(article)
+        print(f"Currently scraping:\n {voivodeship}, page {iteration}, found {len(voivodeship_articles)}")
         iteration += 1
         
     driver.quit()
 
-
-
+    return voivodeship_articles
 
 
 def go_to_next_page(driver, page, voivodeship):
     url = f"https://www.otodom.pl/pl/wyniki/sprzedaz/mieszkanie/{voivodeship}?viewType=listing&limit=72&page={page}"
     driver.get(url)
 
-def get_articles(driver):
-
+def get_articles_list_from_page(driver, voivodeship):
     
-     
+    article_list = []
 
     articles = driver.find_elements(By.TAG_NAME, 'article')
-    print("current amount of articles: ", len(articles))   
     
     for i in articles:
         try: 
@@ -57,28 +52,30 @@ def get_articles(driver):
             data = soup.find_all("div")[3].text.replace(u'\xa0', u' ').replace(' ', '').split("zł")
             data.append(re.findall(r'\d+(?:,\d+)?', data[-1])[1])
             data.append(re.findall(r'\d+(?:,\d+)?', data[2])[0])
+        
+
+            for i in i.text.split("\n"):
+                if "ul." in i:
+                    location = i
+                else:
+                    location = "missing"
+
+            article_list.append({
+                "title": title,
+                "price_pln": data[0],
+                "price_pln_per_m": data[1],
+                "area": data[3],
+                "rooms": data[4],
+                "location": location,
+                "voivodeship": voivodeship
+            })
+
         except Exception as e:
-            print(f"Exception occured, skipping a record! \nTitle of an ad:{title} \nHere's an exception: {e}")
+            print(f"exception occured, skipping a record")
             continue
 
 
-        for i in i.text.split("\n"):
-            if "ul." in i:
-                location = i
-            else:
-                location = "missing"
-
-
-
-        print({
-
-            "title": title,
-            "price_pln": data[0],
-            "price_pln_per_m": data[1],
-            "area": data[3],
-            "rooms": data[4],
-            "location": location
-        })
+    return article_list
     
 
 
