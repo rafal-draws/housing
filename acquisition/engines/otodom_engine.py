@@ -1,6 +1,8 @@
 import re
 import json
 
+import datetime
+
 from bs4 import BeautifulSoup
 from selenium import webdriver
 from selenium.webdriver import Firefox
@@ -11,7 +13,8 @@ from selenium.webdriver.support import expected_conditions as EC
 
 
 
-def initiate_voivodeship_scrapage(voivodeship:str):
+def initiate_voivodeship_scrapage(voivodeship, output_filename):
+
 
     options = webdriver.FirefoxOptions()
     options.add_argument("--headless")
@@ -35,7 +38,7 @@ def initiate_voivodeship_scrapage(voivodeship:str):
         iteration += 1
 
         if iteration % 10 == 0:
-            with open('./data/data.json', 'a', encoding='utf-8') as file:
+            with open(f'./data/{output_filename}', 'a', encoding='utf-8') as file:
                 json.dump(voivodeship_articles, file, ensure_ascii=False, indent=4)
                 file.close()
             voivodeship_articles = []
@@ -90,7 +93,6 @@ def get_articles_list_from_page(driver, voivodeship):
             })
 
         except Exception as e:
-            print(f"exception occured, skipping a record")
             continue
 
 
@@ -115,3 +117,11 @@ def get_limit(driver, url):
     limit = list_of_a[-1].text
 
     return limit
+
+def clean_the_json(filename):
+    with open(filename, 'rw', encoding='utf-8') as f:
+        data = f.read()
+        data = data.replace("][", ',')
+        f.write(data)
+        print("'][' replaced with ','")
+        f.close()
