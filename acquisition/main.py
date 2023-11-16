@@ -32,7 +32,7 @@ def scrape_voivodeship(voivodeship):
 
 def main():
 
-    with concurrent.futures.ThreadPoolExecutor(max_workers=3) as executor:
+    with concurrent.futures.ThreadPoolExecutor(max_workers=1) as executor:
         executor.map(scrape_voivodeship, voivodeships)
 
 
