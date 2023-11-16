@@ -60,39 +60,57 @@ def go_to_next_page(driver, page, voivodeship):
 
 def get_articles_list_from_page(driver, voivodeship):
     
+    
     article_list = []
 
-    articles = driver.find_elements(By.TAG_NAME, 'article')
     
-    for i in articles:
+    lis = driver.find_elements(By.XPATH, '//li[.//article]')
+    
+    for li in lis:
         try: 
-            soup = BeautifulSoup(i.get_attribute('innerHTML'), "html.parser")
+            soup = BeautifulSoup(li.get_attribute('innerHTML'), "html.parser")
+
+            url = soup.find('a')['href']
 
             title = soup.find("span", {"data-cy":"listing-item-title"}).text
         
-            data = soup.find_all("div")[3].text.replace(u'\xa0', u' ').replace(' ', '').split("zł")
-            data.append(re.findall(r'\d+(?:,\d+)?', data[-1])[1])
-            data.append(re.findall(r'\d+(?:,\d+)?', data[2])[0])
         
+            meters = ''.join(re.findall(r'\d+', soup.find_all("span")[-1].text))
+            rooms = ''.join(re.findall(r'\d+', soup.find_all("span")[-2].text))
+            price_per_m = ''.join(re.findall(r'\d+', soup.find_all("span")[-3].text.replace("\xa0", "")))
+            total_price = ''.join(re.findall(r'\d+', soup.find_all("span")[-4].text.replace("\xa0", "")))
 
-            for data_split in i.text.split("\n"):
+
+            for data_split in li.text.split("\n"):
                 if voivodeship in data_split:
                     location = data_split
                     break
                 else:
                     location = "missing"
+            for data_split in li.text.split("\n"):
+                if "Oferta prywatna" in data_split:
+                    private = "1"
+                else:
+                    private = "0"
+
+
+
 
             article_list.append({
+                "id": url[-7:],
                 "title": title,
-                "price_pln": data[0],
-                "price_pln_per_m": data[1],
-                "area": data[3],
-                "rooms": data[4],
+                "total_price_pln": total_price,
+                "price_per_m_pln": price_per_m,
+                "area_in_meters": meters,
+                "rooms": rooms,
                 "location": location,
-                "voivodeship": voivodeship
+                "voivodeship": voivodeship,
+                "url": url,
+                "private": private
             })
 
         except Exception as e:
+            print("exception!", e)
             continue
 
 
@@ -107,7 +125,7 @@ def get_limit(driver, url):
     try:
         driver.find_element(By.XPATH, "//*[@id='onetrust-accept-btn-handler']").click()
     except Exception as e:
-        print(e)
+        "no js!! haha"
 
     element = WebDriverWait(driver, 10).until(
             EC.presence_of_element_located((By.XPATH, "//nav[@data-cy='pagination']"))
