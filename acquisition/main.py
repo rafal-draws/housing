@@ -1,7 +1,7 @@
 import concurrent.futures 
 import datetime
 
-from engines import otodom_engine
+from engines import otodom_engine, otodom_intensive_engine
 
 
 output_filename = "otodom_data_" + datetime.datetime.now().strftime("%Y-%m-%d-%H-%M") + ".json"
