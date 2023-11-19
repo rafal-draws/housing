@@ -2,22 +2,21 @@ import re
 import json
 
 from bs4 import BeautifulSoup
-from selenium import webdriver
+
 from selenium.webdriver import Firefox
 from selenium.webdriver.firefox.options import Options
 from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
 
-from otodom_engine import get_limit, go_to_next_page
+from .otodom_engine import get_limit, go_to_next_page
 
 
 def initiate_voivodeship_scrapage(voivodeship, output_filename):
 
 
-    options = webdriver.FirefoxOptions()
-    options.add_argument("--headless")
-    driver = webdriver.Firefox(options=options)
+    options = Options()
+    # options.add_argument("--headless")
+    #  options.add_argument('--disable-gpu')
+    driver = Firefox(options=options)
     voivodeship_articles = []
 
     iteration = 1
@@ -45,7 +44,7 @@ def initiate_voivodeship_scrapage(voivodeship, output_filename):
         
         if iteration % 25 == 0:
             driver.quit()
-            driver = webdriver.Firefox(options=options)
+            driver = Firefox(options=options)
 
 
         
@@ -62,19 +61,39 @@ def get_articles_list_from_page(driver, voivodeship):
     
     for li in lis:
         try: 
-            soup = BeautifulSoup(li.get_attribute('innerHTML'), "html.parser")
-
-            url = soup.find('a')['href']
+            soup                = BeautifulSoup(li.get_attribute('innerHTML'), "html.parser")
+            url                 = soup.find('a')['href']
 
             driver.get("http://www.otodom.pl/" + url)
-            src = driver.page_source
 
+            src                 = driver.page_source
+            id                  = url[-7:]
+
+
+            # location
+            location            = soup.find("div", {"data-testid":"ad.breadcrumbs"}).find_all("a") # dzielnica
+            district            = location[-1]
+            city                = location[5]
+
+            info_table          = soup.find("div", {"data-testid": "ad.top-information.table"})
+
+            m2                  = info_table.find("div", {"aria-label": "Powierzchnia"}).find("div", {"data-testid": "table-value-area"}).text
+            type_of_ownership   = info_table.find("div", {"aria-label": "Forma własności"}).find("div", {"data-testid": "table-value-area"}).text
+            rooms               = info_table.find("div", {"aria-label": "Liczba Pokoi"}).find("div", {"data-testid": "table-value-area"}).text
+            finishing_condition = info_table.find("div", {"aria-label": "Stan Wykończenia"}).find("div", {"data-testid": "table-value-area"}).text
+            floor               = info_table.find("div", {"aria-label": "Piętro"}).find("div", {"data-testid": "table-value-area"}).text
+            balcony             = info_table.find("div", {"aria-label": "Balkon / ogród / taras"}).find("div", {"data-testid": "table-value-area"}).text
+            rent                = info_table.find("div", {"aria-label": "Czynsz"}).find("div", {"data-testid": "table-value-area"}).text
+            parking             = info_table.find("div", {"aria-label": "Miejsce parkingowe"}).find("div", {"data-testid": "table-value-area"}).text
+            tele_control        = info_table.find("div", {"aria-label": "Obsługa zdalna"}).find("div", {"data-testid": "table-value-area"}).text
+            heating             = info_table.find("div", {"aria-label": "Ogrzewanie"}).find("div", {"data-testid": "table-value-area"}).text
+            
+            description         = soup.find("div", {"data-cy": "adPageAdDescription"}).text
             
 
 
 
-
-
+            print(id)
 
             # article_list.append({
             #     "id": url[-7:],
@@ -87,6 +106,7 @@ def get_articles_list_from_page(driver, voivodeship):
             #     "voivodeship": voivodeship,
             #     "url": url,
             #     "private": private
+            
             # })
 
         except Exception as e:

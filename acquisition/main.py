@@ -27,7 +27,7 @@ voivodeships = [
 
 def scrape_voivodeship(voivodeship):
     
-    otodom_engine.initiate_voivodeship_scrapage(voivodeship, output_filename)
+    otodom_intensive_engine.initiate_voivodeship_scrapage(voivodeship, output_filename)
 
 
 def main():

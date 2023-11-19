@@ -137,7 +137,7 @@ def get_limit(driver, url):
     return limit
 
 def clean_the_json(filename):
-    with open(f'./data/{filename}', 'r', encoding='utf-8') as f:
+    with open(f'../data/{filename}', 'r', encoding='utf-8') as f:
         data = f.read()
         data = data.replace("][", ',')
 
