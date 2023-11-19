@@ -59,6 +59,21 @@ def get_articles_list_from_page(driver, voivodeship):
     
     lis = driver.find_elements(By.XPATH, '//li[.//article]')
     
+    information_table_parameters = [
+        "Powierzchnia", "Forma własności", "Liczba Pokoi",
+        "Stan Wykończenia", "Piętro", "Balkon / ogród / taras",
+        "Czynsz", "Miejsce parkingowe", "Obsługa zdalna", "Ogrzewanie"
+    ]
+
+    additional_info_parameters = [
+        "Rynek", "Typ ogłoszeniodawcy", "Dostępne od",
+        "Rok budowy", "Rodzaj zabudowy", "Okna",
+        "Winda", "Media", "Zabezpieczenia",
+        "Wyposażenie", "Informacje dodatkowe", "Materiał budynku"
+    ]
+
+
+
     for li in lis:
         try: 
             soup                = BeautifulSoup(li.get_attribute('innerHTML'), "html.parser")
@@ -76,19 +91,36 @@ def get_articles_list_from_page(driver, voivodeship):
             city                = location[5]
 
             info_table          = soup.find("div", {"data-testid": "ad.top-information.table"})
+            info_table_values   = []
+            
+            for table_param in information_table_parameters:
+                try:
+                    info_table_values.append(info_table.find("div", {"aria-label": f"{table_param}"}).find("div", {"data-testid": "table-value-area"}).text)
+                except:
+                    info_table_values.append("missing")
 
-            m2                  = info_table.find("div", {"aria-label": "Powierzchnia"}).find("div", {"data-testid": "table-value-area"}).text
-            type_of_ownership   = info_table.find("div", {"aria-label": "Forma własności"}).find("div", {"data-testid": "table-value-area"}).text
-            rooms               = info_table.find("div", {"aria-label": "Liczba Pokoi"}).find("div", {"data-testid": "table-value-area"}).text
-            finishing_condition = info_table.find("div", {"aria-label": "Stan Wykończenia"}).find("div", {"data-testid": "table-value-area"}).text
-            floor               = info_table.find("div", {"aria-label": "Piętro"}).find("div", {"data-testid": "table-value-area"}).text
-            balcony             = info_table.find("div", {"aria-label": "Balkon / ogród / taras"}).find("div", {"data-testid": "table-value-area"}).text
-            rent                = info_table.find("div", {"aria-label": "Czynsz"}).find("div", {"data-testid": "table-value-area"}).text
-            parking             = info_table.find("div", {"aria-label": "Miejsce parkingowe"}).find("div", {"data-testid": "table-value-area"}).text
-            tele_control        = info_table.find("div", {"aria-label": "Obsługa zdalna"}).find("div", {"data-testid": "table-value-area"}).text
-            heating             = info_table.find("div", {"aria-label": "Ogrzewanie"}).find("div", {"data-testid": "table-value-area"}).text
+            m2                  = info_table_values[0]
+            type_of_ownership   = info_table_values[1]
+            rooms               = info_table_values[2]
+            finishing_condition = info_table_values[3]
+            floor               = info_table_values[4]
+            balcony             = info_table_values[5]
+            rent                = info_table_values[6]
+            parking             = info_table_values[7]
+            tele_control        = info_table_values[8]
+            heating             = info_table_values[9]
             
             description         = soup.find("div", {"data-cy": "adPageAdDescription"}).text
+
+            add_info_elem       = soup.find("div", {"data-testid":"ad.additional-information.table"})
+            add_info_values     = []
+
+            for additional_info_param in additional_info_parameters:
+                try:
+                    add_info_values.append(add_info_elem.find("div", {"data-testid":"table-value-extras_types"}).text)
+                except:
+                    add_info_values.append("missing")
+
             
 
 
