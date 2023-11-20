@@ -15,7 +15,7 @@ def initiate_voivodeship_scrapage(voivodeship, output_filename):
 
     options = Options()
     # options.add_argument("--headless")
-    #  options.add_argument('--disable-gpu')
+    # options.add_argument('--disable-gpu')
     driver = Firefox(options=options)
     voivodeship_articles = []
 
