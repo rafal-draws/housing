@@ -43,7 +43,7 @@ def initiate_voivodeship_scrapage(voivodeship, output_filename):
                 file.close()
             voivodeship_articles = []
         
-        if iteration % 25 == 0:
+        if iteration % 10 == 0:
             driver.quit()
             driver = webdriver.Firefox(options=options)
 
