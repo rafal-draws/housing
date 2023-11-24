@@ -1,4 +1,3 @@
-import re
 import json
 import csv
 
@@ -6,7 +5,6 @@ from bs4 import BeautifulSoup
 
 from selenium.webdriver import Firefox
 from selenium.webdriver.firefox.options import Options
-from selenium.webdriver.common.by import By
 
 from .otodom_engine import get_limit, go_to_next_page
 
@@ -26,7 +24,7 @@ def initiate_voivodeship_scrapage(voivodeship, output_filename, filetype):
               "extras_types", "building_material", "url"]
 
     if filetype == "csv":
-        with open(f'./data/{output_filename}', 'w', encoding='utf-8', newline='') as file:
+        with open(output_filename, 'w', encoding='utf-8', newline='') as file:
             writer = csv.writer(file, delimiter='|')
             writer.writerow(header)
             file.close()
@@ -54,7 +52,7 @@ def initiate_voivodeship_scrapage(voivodeship, output_filename, filetype):
         if filetype == "json":
 
             if iteration % 10 == 0:
-                with open(f'./data/{output_filename}', 'a', encoding='utf-8') as file:
+                with open(output_filename, 'a', encoding='utf-8') as file:
                     json.dump(voivodeship_articles, file, ensure_ascii=False, indent=4)
                     file.close()
                 voivodeship_articles = []
@@ -62,7 +60,7 @@ def initiate_voivodeship_scrapage(voivodeship, output_filename, filetype):
 
         if filetype == "csv":
             if iteration % 5 == 0:
-                with open(f'./data/{output_filename}', 'a', encoding='utf-8', newline='') as file:
+                with open(output_filename, 'a', encoding='utf-8', newline='') as file:
                     writer = csv.writer(file, delimiter='|')
                     writer.writerows(voivodeship_articles)
                 voivodeship_articles = []
