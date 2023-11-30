@@ -1,21 +1,36 @@
 import json
 import csv
+import time
 
 from bs4 import BeautifulSoup
 
-from selenium.webdriver import Firefox
-from selenium.webdriver.firefox.options import Options
-
-from .otodom_engine import get_limit, go_to_next_page
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 
 
 def initiate_voivodeship_scrapage(voivodeship, output_filename, filetype):
 
 
-    options = Options()
-    options.add_argument("--headless")
-    options.add_argument('--disable-gpu')
-    driver = Firefox(options=options)
+    chrome_options = webdriver.ChromeOptions()
+    chrome_options.add_argument('--window-size=1920,1080')
+    chrome_options.add_argument('--headless')
+    chrome_options.add_argument('--no-sandbox')
+    chrome_options.add_argument('--disable-gpu')
+    chrome_options.add_experimental_option("excludeSwitches", ["enable-automation"])
+    chrome_options.add_experimental_option("useAutomationExtension", False)
+
+
+
+    driver = webdriver.Chrome(options=chrome_options)
+    driver.get("https://www.otodom.pl/")
+    print(driver.page_source)
+
+    if driver:
+        print("driver initiated")
+    else:
+        print("driver couldn't initiate")
 
     header = ["id", "price", "voivodeship", "district", "city", "m2", "type_of_ownership", "rooms",
               "finishing_condition", "floor", "balcony", "rent", "parking", "heating",
@@ -33,6 +48,8 @@ def initiate_voivodeship_scrapage(voivodeship, output_filename, filetype):
 
     iteration = 1
     url = f"https://www.otodom.pl/pl/wyniki/sprzedaz/mieszkanie/{voivodeship}?viewType=listing&limit=72&page={iteration}"
+    time.sleep(10)
+    
     limit = int(get_limit(driver, url))
 
     print("limit is: ", limit)
@@ -70,7 +87,7 @@ def initiate_voivodeship_scrapage(voivodeship, output_filename, filetype):
 
         if iteration % 5 == 0:
             driver.quit()
-            driver = Firefox(options=options)
+            driver = webdriver.Chrome(options=chrome_options)
 
 
         
@@ -175,5 +192,37 @@ def get_articles_list_from_page(driver, voivodeship:str):
             print("exception!", e)
             continue
 
-
     return article_list
+
+
+
+def go_to_next_page(driver, page, voivodeship):
+    url = f"https://www.otodom.pl/pl/wyniki/sprzedaz/mieszkanie/{voivodeship}?viewType=listing&limit=72&page={page}"
+    driver.get(url)
+
+def get_limit(driver, url):
+    driver.get(url)
+    try:
+        driver.find_element(By.XPATH, "//*[@id='onetrust-accept-btn-handler']").click()
+    except Exception as e:
+        "no js!! haha"
+    print(driver.title)
+    print("current source:")
+
+    print(driver.page_source)
+
+
+    try:
+        element = WebDriverWait(driver, 60).until(
+                EC.presence_of_element_located((By.XPATH, "//nav[@data-cy='pagination']"))
+            )
+        
+        list_of_a = element.find_elements(By.TAG_NAME, 'a')
+
+        limit = list_of_a[-1].text
+
+    except Exception as e:
+        print(e)
+        limit = 50
+    finally:
+        return limit
