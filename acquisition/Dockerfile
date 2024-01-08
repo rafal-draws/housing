@@ -25,6 +25,4 @@ RUN pip install -r requirements.txt
 
 RUN chmod +x ./entrypoint.sh
 
-ENTRYPOINT [ "/app/entrypoint.sh" ]
-
 CMD ["echo", "Default argument from CMD instruction"]

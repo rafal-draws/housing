@@ -10,22 +10,35 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
 
-def initiate_voivodeship_scrapage(voivodeship, output_filename, filetype):
+def initiate_voivodeship_scrapage(voivodeship, output_filename, filetype, browser):
 
 
-    chrome_options = webdriver.ChromeOptions()
-    chrome_options.add_argument('--window-size=1920,1080')
-    chrome_options.add_argument('--headless')
-    chrome_options.add_argument('--no-sandbox')
-    chrome_options.add_argument('--disable-gpu')
-    chrome_options.add_experimental_option("excludeSwitches", ["enable-automation"])
-    chrome_options.add_experimental_option("useAutomationExtension", False)
+    if browser == "firefox":
+        from selenium.webdriver.firefox.service import Service as FirefoxService
+        from webdriver_manager.firefox import GeckoDriverManager
 
 
 
-    driver = webdriver.Chrome(options=chrome_options)
+        _options = webdriver.FirefoxOptions()
+        _options.add_argument("--headless")
+
+        driver = webdriver.Firefox(service=FirefoxService(GeckoDriverManager().install()),  options = _options)        
+    else:
+        from selenium.webdriver.chrome.service import Service as ChromeService
+        from webdriver_manager.chrome import ChromeDriverManager
+
+        _options = webdriver.ChromeOptions()
+        _options.add_argument('--window-size=1920,1080')
+        _options.add_argument('--headless')
+        _options.add_argument('--no-sandbox')
+        _options.add_argument('--disable-gpu')
+        _options.add_experimental_option("excludeSwitches", ["enable-automation"])
+        _options.add_experimental_option("useAutomationExtension", False)
+
+        driver = webdriver.Chrome(service=ChromeService(ChromeDriverManager().install()), options = _options)
+
+
     driver.get("https://www.otodom.pl/")
-    print(driver.page_source)
 
     if driver:
         print("driver initiated")
@@ -76,7 +89,7 @@ def initiate_voivodeship_scrapage(voivodeship, output_filename, filetype):
 
 
         if filetype == "csv":
-            if iteration % 5 == 0:
+            if iteration % 2 == 0:
                 with open(output_filename, 'a', encoding='utf-8', newline='') as file:
                     writer = csv.writer(file, delimiter='|')
                     writer.writerows(voivodeship_articles)
@@ -87,7 +100,7 @@ def initiate_voivodeship_scrapage(voivodeship, output_filename, filetype):
 
         if iteration % 5 == 0:
             driver.quit()
-            driver = webdriver.Chrome(options=chrome_options)
+            driver = webdriver.Chrome(options=_options)
 
 
         
@@ -207,9 +220,6 @@ def get_limit(driver, url):
     except Exception as e:
         "no js!! haha"
     print(driver.title)
-    print("current source:")
-
-    print(driver.page_source)
 
 
     try:
